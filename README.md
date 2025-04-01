@@ -4,7 +4,7 @@ Welcome to the app for resume optimization . This application build for optimiza
 ## Project Overview 
 
 ### Resume Optimization Application Architecture 
-![Alt Text](../client/src/assets/resume-op.png)
+![Alt Text](../api/src/assets/resume-op.png)
 
 ## Features 
 - Login page where user authenticated by google
@@ -21,12 +21,12 @@ Welcome to the app for resume optimization . This application build for optimiza
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/abishkar123/resume-optimizaton-client.git
+   git clone https://github.com/abishkar123/Resume-optimization-api.git
    
    ```
 2. Clone the repository:
    ```bash
-   cd client
+   cd api
    npm install
    ```
 
