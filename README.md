@@ -1,10 +1,10 @@
-# Resume Optimization ApplicatioN
+# Resume Optimization Application
 Welcome to the app for resume optimization . This application build for optimizate the resume base on user requirement source by AI Model.
 
 ## Project Overview 
 
 ### Resume Optimization Application Architecture 
-![Alt Text](../api/src/assets/resume-op.png)
+![Alt Text](./src/assets/resume-op.png)
 
 ## Features 
 - Login page where user authenticated by google
