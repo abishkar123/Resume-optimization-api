@@ -54,6 +54,7 @@ if(!fs.existsSync(uploadsDir)){
 
 
 import resumeRoutes from './route/resumeRoute'
+// http://localhost:8000/api/v1/resumes
 
 // route 
 app.use('/api/v1/resumes/upload', resumeRoutes)
