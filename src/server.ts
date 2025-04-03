@@ -20,7 +20,7 @@ app.use(express.urlencoded({extended:true}))
 
 const storage = multer.diskStorage({
     destination:(req, file, cd)=>{
-        cd(null, './upload/');
+        cd(null, './uploads/');
     },
 
     filename:(req, file, cd) =>{
@@ -56,7 +56,8 @@ if(!fs.existsSync(uploadsDir)){
 import resumeRoutes from './route/resumeRoute'
 
 // route 
-app.use('/api/resumes', resumeRoutes)
+app.use('/api/v1/resumes/upload', resumeRoutes)
+
 
 app.use("/", (req, res, next) => {
   const error = {
@@ -67,8 +68,7 @@ app.use("/", (req, res, next) => {
 
 //global error handleer
 app.use((error, req, res, next) => {
-  console.log(error);
-  const statusCode = error.errorCode || 404;
+  const statusCode = Number(error.errorCode) || 404;
   res.status(statusCode).json({
     status: "error",
     message: error.message,
