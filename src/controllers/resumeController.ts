@@ -9,7 +9,7 @@ import { bucketName, s3Client } from '../config/s3Cofig';
 export const uploadResume = async (req:Request, res:Respone): Promise<void> =>{
     try {
     if(!req.file){
-        res.status(400).json({message: 'No file uploaded'})
+        res.status(400).json({status:'error',message: 'No file uploaded'})
         return;
     }
 
@@ -30,7 +30,8 @@ export const uploadResume = async (req:Request, res:Respone): Promise<void> =>{
 
       fs.unlinkSync(file.path);
 
-      res.status(200).json({ 
+      res.status(201).json({ 
+        status: "sucess",
         message: 'Resume uploaded successfully',
         fileUrl: `https://${bucketName}.s3.amazonaws.com/${fileName}`
       });
