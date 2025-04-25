@@ -62,9 +62,11 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 import resumeRoutes from "./route/resumeRoute";
+import optimizeRouter from "./route/resumeRoute";
 
 // route
-app.use("/api/v1/resumes/upload", resumeRoutes);
+app.use("/api/v1/resumes", resumeRoutes);
+app.use("/api/v1/resumes", optimizeRouter);
 
 app.use("/", (req, res, next) => {
   const error = {
