@@ -16,7 +16,7 @@ import { connectDB } from "./config/dbConfig";
 connectDB();
 
 const corsOptions = {
-  origin: "https://resume-optimizaton-client.vercel.app/",
+  origin: "https://resume-optimizaton-client.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
