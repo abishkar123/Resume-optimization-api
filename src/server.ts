@@ -15,16 +15,9 @@ const PORT = process.env.PORT || 8000;
 import { connectDB } from "./config/dbConfig";
 connectDB();
 
-const corsOptions = {
-  origin: "https://resume-optimizaton-client.vercel.app",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-};
-
 //middleware
 app.use(helmet());
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
