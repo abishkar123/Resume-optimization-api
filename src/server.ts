@@ -19,6 +19,7 @@ const corsOptions = {
   origin: "https://resume-optimizaton-client.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 };
 
 //middleware
