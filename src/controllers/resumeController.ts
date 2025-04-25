@@ -64,26 +64,18 @@ export const optimizeUserResume = async (req, res) => {
       return res.status(400).json({ error: "Email is required" });
     }
 
-    console.log(email);
-    // Find user in MongoDB
     const user = await getuserbygmail(email);
-    console.log(user);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Get resume from S3
     const resumeBuffer = await getFile(user.resumeUrl);
 
-    // Extract text from PDF
     const resumeText = await extractTextFromPDF(resumeBuffer);
 
-    // Get optimized resume from AI service
     const optimizedResume = await optimizeResume(resumeText);
 
-    console.log(optimizedResume);
-    // Save optimization history
     user.optimizationHistory.push({
       date: new Date(),
       originalText: resumeText,
