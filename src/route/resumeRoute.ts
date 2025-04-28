@@ -1,12 +1,15 @@
 import express from "express";
+import { uploadMiddleware } from "../middleware/uploadMiddleware";
 import {
-  optimizeUserResume,
+  getUserHistory,
+  optimizeResume,
   uploadResume,
 } from "../controllers/resumeController";
-import { upload } from "../server";
+
 const router = express.Router();
 
-router.post("/upload", upload.single("resume"), uploadResume);
-router.post("/optimize", optimizeUserResume);
+router.post("/upload", uploadMiddleware, uploadResume);
+router.post("/", optimizeResume);
+router.get("/history/:email", getUserHistory);
 
 export default router;

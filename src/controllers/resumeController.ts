@@ -1,102 +1,117 @@
-import { Request, Respone } from "express";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import fs from "fs";
-import { bucketName, getFile, s3Client } from "../config/s3Cofig";
-import { getuserbygmail, postResume } from "../model/upload/UploadModel";
-import User from "../model/upload/userSchema";
-import { extractTextFromPDF } from "../utils/pdfparser";
-import { optimizeResume } from "../services/optimizeResume";
+import {
+  getuserbygmail,
+  postResume,
+  updateUserOptimizationHistory,
+} from "../model/upload/UploadModel";
+import { optimizeResumeai } from "../services/aiService";
+import { getFileFromS3, uploadFileToS3 } from "../services/s3Service";
+import { extractTextFromFile } from "../services/textExtractionService";
+import { catchAsync } from "../utils/catchAsync";
 
-// const bucketName = process.env.AWS_BUCKET_NAME
+export const uploadResume = catchAsync(async (req, res) => {
+  if (!req.file) {
+    throw new Error("Please upload a resume file");
+  }
 
-export const uploadResume = async (
-  req: Request,
-  res: Respone
-): Promise<void> => {
-  try {
-    if (!req.file) {
-      res.status(400).json({ status: "error", message: "No file uploaded" });
-      return;
-    }
+  const { fullname, email } = req.body;
 
-    const file = req.file;
-    const fileStream = fs.createReadStream(file.path);
+  if (!fullname || !email) {
+    throw new Error("Full name and email are required");
+  }
 
-    const fileName = `resumes/${Date.now()}-${file.originalname}`;
+  const fileName = `${Date.now()}-${req.file.originalname}`;
+  const fileKey = `resumes/${email}/${fileName}`;
 
-    const uploadParams = {
-      Bucket: bucketName,
-      Key: fileName,
-      Body: fileStream,
-      ContentType: file.mimetype,
-    };
+  const uploadResult = await uploadFileToS3(
+    req.file.buffer,
+    fileKey,
+    req.file.mimetype
+  );
 
-    const command = new PutObjectCommand(uploadParams);
-    await s3Client.send(command);
+  const existingUser = await getuserbygmail(email);
 
-    fs.unlinkSync(file.path);
-
-    const result = (await postResume({
-      ...req.body,
-      resumeUrl: `https://${bucketName}.s3.amazonaws.com/${fileName}`,
-    })) as { resumeUrl: string } & typeof result;
-
-    res.status(201).json({
-      status: "sucess",
-      message: "Resume uploaded successfully",
-      fileUrl: result.resumeUrl,
-      resume: result,
-    });
-  } catch (error) {
-    console.error("Error uploading file:", error);
-    res.status(500).json({
-      message: "Error uploading file",
-      error: (error as Error).message,
+  if (existingUser) {
+    existingUser.fullname = fullname;
+    existingUser.resumeUrl = uploadResult.Location;
+    await existingUser.save();
+  } else {
+    await postResume({
+      fullname,
+      email,
+      resumeUrl: uploadResult.Location,
     });
   }
-};
 
-export const optimizeUserResume = async (req, res) => {
-  try {
-    const { email } = req.body;
+  res.status(201).json({
+    success: true,
+    message: "Resume uploaded successfully",
+    fileUrl: uploadResult.Location,
+    fileKey: fileKey,
+  });
+});
 
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
-    }
+export const optimizeResume = catchAsync(async (req, res) => {
+  const { email, fileUrl } = req.body;
 
-    const user = await getuserbygmail(email);
+  if (!email || !fileUrl) {
+    throw new Error("Email and file URL are required");
+  }
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+  // Extract fileKey from the fileUrl
+  const fileKey = fileUrl.split("amazonaws.com/")[1];
 
-    const resumeBuffer = await getFile(user.resumeUrl);
+  if (!fileKey) {
+    throw new Error("Invalid file URL");
+  }
 
-    const resumeText = await extractTextFromPDF(resumeBuffer);
+  const fileData = await getFileFromS3(fileKey);
 
-    const optimizedResume = await optimizeResume(resumeText);
+  // Extract text from file
+  const resumeText = await extractTextFromFile(
+    fileData.Body,
+    fileData.ContentType
+  );
 
-    user.optimizationHistory.push({
-      date: new Date(),
-      originalText: resumeText,
-      optimizedText: optimizedResume,
-    });
+  if (!resumeText) {
+    throw new Error("Failed to extract text from the resume");
+  }
 
-    await user.save();
+  // Optimize resume using AI
+  const optimizedResume = await optimizeResumeai(resumeText);
 
-    res.json({
-      success: true,
-      originalResume: resumeText,
-      optimizedResume,
+  // Save optimization history
+  await updateUserOptimizationHistory(email, resumeText, optimizedResume);
+
+  res.status(201).json({
+    success: true,
+    message: "Resume optimized successfully",
+    originalResume: resumeText,
+    optimizedResume: optimizedResume,
+  });
+});
+
+export const getUserHistory = catchAsync(async (req, res) => {
+  const { email } = req.params;
+
+  if (!email) {
+    throw new Error("Email is required");
+  }
+
+  const user = await getuserbygmail(email);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  res.status(201).json({
+    success: true,
+    data: {
       user: {
-        fullName: user.fullname,
+        fullname: user.fullname,
         email: user.email,
+        resumeUrl: user.resumeUrl,
       },
-    });
-  } catch (error) {
-    console.error("Resume optimization failed:", error);
-    res
-      .status(500)
-      .json({ error: "Resume optimization failed", details: error.message });
-  }
-};
+      optimizationHistory: user.optimizationHistory,
+    },
+  });
+});

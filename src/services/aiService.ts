@@ -1,8 +1,8 @@
-import { GoogleGenAI, HarmCategory } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 dotenv.config();
 
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY! });
+const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 
 const model = "gemini-2.0-flash-lite-001";
 
@@ -59,7 +59,7 @@ const generationConfig = {
   },
 };
 
-export const optimizeResume = async (resumeText) => {
+export const optimizeResumeai = async (resumeText) => {
   try {
     const req = {
       model: model,

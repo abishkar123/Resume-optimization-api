@@ -18,17 +18,21 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.779.0",
+    "@aws-sdk/s3-request-presigner": "^3.796.0",
     "@google/genai": "^0.10.0",
     "aws-sdk": "^2.1692.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
+    "mammoth": "^1.9.0",
     "mongodb": "^6.16.0",
     "mongoose": "^8.13.2",
+    "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.2",
     "nodemon": "^3.1.10",
     "pdf-parse": "^1.1.1",
+    "url": "^0.11.4",
     "uuid": "^11.1.0"
   }
 }

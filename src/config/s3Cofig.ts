@@ -4,13 +4,15 @@ import { Readable } from "stream";
 
 dotenv.config();
 
-export const bucketName = process.env.AWS_BUCKET_NAME || "";
+export const bucketName = (
+  process.env.AWS_BUCKET_NAME || "resume-bucket.ai"
+).trim(); // ensure no extra spaces
 
 export const s3Client = new S3Client({
-  region: process.env.AWS_REGION || "us-east-1",
+  region: (process.env.AWS_REGION || "ap-southeast-2").trim(), // ensure no extra spaces
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
+    accessKeyId: (process.env.AWS_ACCESS_KEY_ID || "").trim(),
+    secretAccessKey: (process.env.AWS_SECRET_ACCESS_KEY || "").trim(),
   },
 });
 
@@ -18,6 +20,10 @@ export const getFile = async (fileUrl: string): Promise<Buffer> => {
   const key = fileUrl.includes("amazonaws.com")
     ? fileUrl.split("/").slice(3).join("/")
     : fileUrl;
+
+  console.log(fileUrl);
+
+  console.log("S3 Request => Bucket:", bucketName, "| Key:", key); // clear debug log
 
   const command = new GetObjectCommand({
     Bucket: bucketName,
