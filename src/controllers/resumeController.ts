@@ -65,8 +65,6 @@ export const optimizeResume = catchAsync(async (req, res) => {
   }
 
   const fileData = await getFileFromS3(fileKey);
-
-  // Extract text from file
   const resumeText = await extractTextFromFile(
     fileData.Body,
     fileData.ContentType
@@ -76,7 +74,6 @@ export const optimizeResume = catchAsync(async (req, res) => {
     throw new Error("Failed to extract text from the resume");
   }
 
-  // Optimize resume using AI
   const optimizedResume = await optimizeResumeai(resumeText);
 
   // Save optimization history
