@@ -42,7 +42,6 @@ export const uploadFileToS3 = async (fileBuffer, fileName, contentType) => {
   }
 };
 
-// Function to retrieve a file from S3
 export const getFileFromS3 = async (fileKey) => {
   try {
     const params = {
@@ -65,7 +64,6 @@ export const getFileFromS3 = async (fileKey) => {
   }
 };
 
-// Helper function to determine content type from file extension
 function determineContentType(fileKey) {
   if (fileKey.toLowerCase().endsWith(".pdf")) {
     return "application/pdf";
@@ -77,7 +75,6 @@ function determineContentType(fileKey) {
   return "application/octet-stream";
 }
 
-// Helper function to convert the S3 stream to a buffer
 const streamToBuffer = (stream) => {
   return new Promise((resolve, reject) => {
     const chunks = [];

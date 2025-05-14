@@ -1,8 +1,6 @@
 import dotenv from "dotenv";
 import express, { Express } from "express";
-
 import cors from "cors";
-
 import helmet from "helmet";
 import morgan from "morgan";
 
@@ -25,9 +23,11 @@ app.use(morgan("dev"));
 // route
 import resumeRoutes from "./route/resumeRoute";
 import optimizeRoutes from "./route/resumeRoute";
+import downloadRoutes from "./route/resumeRoute";
 
 app.use("/api/v1/resumes", resumeRoutes);
 app.use("/api/v1/resumes/optimize-resume", optimizeRoutes);
+app.use("/api/v1/resumes", downloadRoutes);
 
 app.use("/", (req, res, next) => {
   const error = {
