@@ -47,7 +47,6 @@ Focus on leadership, strategic impact, and business outcomes
 
 Highlight management scope where applicable 
 
-Also, focus on advance the experience should be focus on Job target, example if you have software engineer and user have experience on retails, then you should provide your retail have not value to software engineer resume. 
 
 Early Career (1-3 years): Use "Action Verb + Task + Result" structure 
 
@@ -109,17 +108,16 @@ Consistent spacing and alignment throughout
 
 Section ordering by experience: 
 
-Experienced: Summary → Competencies → Experience → Skills → Education 
+Experienced: Summary → Experience → Skills → Education 
 
 Early Career: Summary → Skills → Experience → Education → Projects 
-
-Entry-Level: Summary → Education → Projects → Skills → Experience 
 
 Address employment gaps professionally 
 
 Use bold section headers 
 
- 
+Also, focus on advance the experience should be focus on Job target, example if you have software engineer and user have experience on retails, then you should provide your retail have not value to software engineer resume. 
+
 
 7. Content Scaling 
 
