@@ -92,13 +92,12 @@ Specific Improvements Needed: Generate an organized, bulleted list of actionable
 Revised Resume: Provide a completely revised version of the resume that incorporates all the recommended changes.
 Additional Tips: Offer industry/role-specific advice if applicable, drawing on the target role/industry provided in the input.
 
-
  `,
 };
 
 const generationConfig = {
-  maxOutputTokens: 5002,
-  temperature: 0.6,
+  maxOutputTokens: 6002,
+  temperature: 0.0,
   topP: 0,
   responseModalities: ["TEXT"],
 
