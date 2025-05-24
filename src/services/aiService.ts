@@ -97,7 +97,7 @@ Additional Tips: Offer industry/role-specific advice if applicable, drawing on t
 };
 
 const generationConfig = {
-  maxOutputTokens: 4802,
+  maxOutputTokens: 5002,
   temperature: 0.6,
   topP: 0,
   responseModalities: ["TEXT"],
