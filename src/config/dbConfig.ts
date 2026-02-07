@@ -1,4 +1,8 @@
 import mongoose from "mongoose";
+import dns from "dns";
+
+// Force specific DNS servers to resolve SRV records if local DNS fails
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 export const connectDB = async () => {
   try {
