@@ -5,6 +5,7 @@ import cors from "cors";
 
 import helmet from "helmet";
 import morgan from "morgan";
+import { generalLimiter } from "./middleware/rateLimiter";
 
 const app: Express = express();
 dotenv.config();
@@ -16,6 +17,7 @@ import { connectDB } from "./config/dbConfig";
 connectDB();
 
 //middleware
+app.use(generalLimiter);
 app.use(helmet());
 app.use(
   cors({

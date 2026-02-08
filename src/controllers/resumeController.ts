@@ -13,10 +13,15 @@ export const uploadResume = catchAsync(async (req, res) => {
     throw new Error("Please upload a resume file");
   }
 
-  const { fullname, email } = req.body;
+  const { fullname } = req.body;
+  const email = (req as any).user?.email;
 
-  if (!fullname || !email) {
-    throw new Error("Full name and email are required");
+  if (!email) {
+    throw new Error("User email not found in token");
+  }
+
+  if (!fullname) {
+    throw new Error("Full name is required");
   }
 
   const fileName = `${Date.now()}-${req.file.originalname}`;
@@ -51,7 +56,8 @@ export const uploadResume = catchAsync(async (req, res) => {
 });
 
 export const optimizeResume = catchAsync(async (req, res) => {
-  const { email, fileUrl, targetRole, jobDescriptions } = req.body;
+  const { fileUrl, targetRole, jobDescriptions } = req.body;
+  const email = (req as any).user?.email;
 
   if (!email || !fileUrl) {
     throw new Error("Email and file URL are required");
@@ -94,9 +100,17 @@ export const optimizeResume = catchAsync(async (req, res) => {
 
 export const getUserHistory = catchAsync(async (req, res) => {
   const { email } = req.params;
+  const authEmail = (req as any).user?.email;
 
   if (!email) {
     throw new Error("Email is required");
+  }
+
+  if (email !== authEmail) {
+    return res.status(403).json({
+      success: false,
+      message: "You are not authorized to view this history",
+    });
   }
 
   const user = await getuserbygmail(email);
