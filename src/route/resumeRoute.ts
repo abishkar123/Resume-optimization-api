@@ -9,7 +9,7 @@ import {
 const router = express.Router();
 
 router.post("/upload", uploadMiddleware, uploadResume);
-router.post("/", optimizeResume);
+router.post("/optimize-resume", optimizeResume);
 router.get("/history/:email", getUserHistory);
 
 export default router;

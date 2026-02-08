@@ -31,10 +31,8 @@ app.use(morgan("dev"));
 
 // route
 import resumeRoutes from "./route/resumeRoute";
-import optimizeRoutes from "./route/resumeRoute";
 
 app.use("/api/v1/resumes", resumeRoutes);
-app.use("/api/v1/resumes/optimize-resume", optimizeRoutes);
 
 app.use("/", (req, res, next) => {
   const error = {

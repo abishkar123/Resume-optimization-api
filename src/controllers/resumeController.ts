@@ -3,7 +3,7 @@ import {
   postResume,
   updateUserOptimizationHistory,
 } from "../model/upload/UploadModel";
-import { optimizeResumeai } from "../services/aiService";
+import { optimizeResumeAI } from "../services/aiService";
 import { getFileFromS3, uploadFileToS3 } from "../services/s3Service";
 import { extractTextFromFile } from "../services/textExtractionService";
 import { catchAsync } from "../utils/catchAsync";
@@ -51,7 +51,7 @@ export const uploadResume = catchAsync(async (req, res) => {
 });
 
 export const optimizeResume = catchAsync(async (req, res) => {
-  const { email, fileUrl } = req.body;
+  const { email, fileUrl, targetRole, jobDescriptions } = req.body;
 
   if (!email || !fileUrl) {
     throw new Error("Email and file URL are required");
@@ -74,7 +74,12 @@ export const optimizeResume = catchAsync(async (req, res) => {
     throw new Error("Failed to extract text from the resume");
   }
 
-  const optimizedResume = await optimizeResumeai(resumeText);
+  // Use default target role if not provided
+  const role = targetRole || "General Professional";
+  const jobDescs = jobDescriptions || [];
+
+  // LangChain returns optimized resume as string
+  const optimizedResume = await optimizeResumeAI(resumeText, role, jobDescs);
 
   // Save optimization history
   await updateUserOptimizationHistory(email, resumeText, optimizedResume);

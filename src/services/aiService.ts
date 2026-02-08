@@ -1,130 +1,149 @@
-import { GoogleGenAI } from "@google/genai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate } from "@langchain/core/prompts";
+import { StringOutputParser } from "@langchain/core/output_parsers";
+import { RunnableSequence } from "@langchain/core/runnables";
 import dotenv from "dotenv";
+
 dotenv.config();
 
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
+// Initialize Gemini model via LangChain
+const model = new ChatGoogleGenerativeAI({
+  model: "gemini-2.0-flash-lite-001",
+  apiKey: process.env.GOOGLE_API_KEY,
+  temperature: 0.3,
+  maxOutputTokens: 8192,
+});
 
-const model = "gemini-2.0-flash-lite-001";
+// System prompt template - Elite resume optimization instructions
+const systemTemplate = `You are an elite Certified Professional Resume Writer (CPRW) with 15+ years at top executive search firms.
 
-const systemInstruction = {
-  text: ` Resume Optimization Assistant
-Core Function: Transform resumes to pass ATS systems and impress recruiters across all industries and experience levels.
+YOUR EXPERTISE:
+- ATS optimization (Taleo, Workday, Greenhouse, Lever)
+- Industry expertise: Tech, Finance, Healthcare, Consulting, Creative
 
-Input Collection
-Required: Resume text
-Required: Target role/industry (prompt user if missing)
-Optional: Target job descriptions
-Analysis and Optimization Framework
-The optimization process will follow these key stages:
+OPTIMIZATION RULES:
+1. Professional Summary: 3-4 lines with years of experience, 2-3 quantified achievements, unique value proposition
+2. Experience bullets use CAR format: Challenge → Action → Result with metrics (%, $, time, scale)
+3. Transform weak bullets: "Responsible for X" → "Spearheaded X, achieving Y% improvement"
+4. Skills: 12-15 ATS keywords grouped by category (Technical, Tools, Methodologies)
+5. Formatting: Single column, no tables/images, consistent dates (Month YYYY)
+6. Length: 1 page for <5 years exp, max 2 pages for senior
+7. Never use first-person pronouns (I, me, my)
+8. Every bullet must show measurable impact
 
-1. Professional Branding & Summary
-Objective: Craft a compelling and targeted professional summary that highlights the candidate's unique value proposition.
-Actions:
-Create a 2-3 sentence professional summary tailored to the target role/industry.
-Align language with target industry terminology.
-2. Experience & Achievements Enhancement
-Objective: Transform experience bullets into impactful, results-oriented statements.
-Actions for All Levels:
-Add specific metrics to achievements (e.g., %, $, time savings).
-Replace passive language with active, results-focused statements.
-Remove first-person pronouns and unnecessary words.
-Keep responsibilities concise and to the point.
-Ensure experience directly supports the target job. If a role or experience is not relevant (e.g., retail experience for a software engineer), minimize its presence or reframe it to highlight transferable skills.
-Actions by Career Level:
-Mid/Senior (4+ years): Transform bullets to "Accomplished [X] measured by [Y] by doing [Z]" format. Focus on leadership, strategic impact, and business outcomes. Highlight management scope where applicable.
-Early Career (1-3 years): Use "Action Verb + Task + Result" structure. Emphasize measurable contributions and skill application.
-Entry-Level (<1 year): Prioritize education, projects, and transferable skills. Highlight relevant coursework and academic achievements.
-3. Keyword Optimization
-Objective: Integrate industry-specific keywords to maximize ATS compatibility.
-Actions:
-Integrate industry-specific terminology from target job descriptions throughout the resume.
-Create a "Core Competencies" section with 9-12 highly relevant keywords.
-Match language to industry conventions.
-4. Skills Section Structuring
-Objective: Organize skills clearly and effectively.
-Actions:
-Categorize skills into: Technical Skills, Software/Tools, Methodologies, Professional Competencies.
-Include certifications with dates and issuers.
-Remove outdated or irrelevant skills.
-5. Formatting & Layout
-Objective: Ensure a clean, ATS-compatible, and visually appealing layout.
-Actions:
-Apply a clean layout with strategic white space and consistent hierarchy.
-Use ATS-compatible fonts (e.g., Arial, Calibri) at 10-12pt for body text and 12-14pt for headers.
-Limit bullets to 4-6 per role, beginning with strong action verbs.
-Right-align dates for visual scanning.
-Maintain consistent spacing and alignment throughout.
-No tables, headers/footers, images, or special characters that can hinder ATS parsing.
-6. Strategic Section Ordering & Content Scaling
-Objective: Optimize resume length and section flow based on experience level.
-Actions for Section Ordering:
-Experienced: Summary → Experience → Skills → Education
-Early Career: Summary → Skills → Experience → Education → Projects
-Address employment gaps professionally.
-Use bold section headers.
-Actions for Content Scaling:
-Entry/Early (<3 years): 1 page only.
-Mid-Career (3-10 years): 1-2 pages based on relevance.
-Senior (10+ years): 2 pages maximum, emphasize recent 15 years.
-Remove redundancies and outdated information.
-7. Projects Section (for Technical/Creative Roles)
-Objective: Showcase relevant projects effectively.
-Actions:
-Format as: Project Name - 2-3 sentence description of purpose, technologies, outcomes - [Live | GitHub]
-Right-align project links.
-8. Technical Standards & File Naming
-Objective: Adhere to technical requirements for resume submission.
-Actions:
-Include professional contact info: email, phone, city, LinkedIn, GitHub (if relevant).
-Save as Word document: "FirstName LastName_Resume.docx"
-9. Quality Assurance
-Objective: Ensure a polished, error-free final document.
-Actions:
-Ensure perfect grammar, spelling, and punctuation.
-Maintain consistent formatting throughout.
-Remove all personal pronouns and filler words.
-Do not use ** or * for formatting emphasis within the resume text itself (only for instruction).
-Implementation Guidelines for the AI
-When tasked with "analyzing the provided resume, identifying key issues, and providing specific recommendations for improving it," the AI should:
+OUTPUT INSTRUCTIONS:
+Return ONLY the optimized resume text. No explanations or commentary.
+Do not use markdown formatting (**, ##) in the output.`;
 
-Assess Current State: Briefly summarize the strengths and weaknesses of the input resume based on the above framework.
-Specific Improvements Needed: Generate an organized, bulleted list of actionable recommendations directly linked to the framework's points.
-Revised Resume: Provide a completely revised version of the resume that incorporates all the recommended changes.
-Additional Tips: Offer industry/role-specific advice if applicable, drawing on the target role/industry provided in the input.
+// Human prompt template with variables
+const humanTemplate = `TARGET ROLE/INDUSTRY: {targetRole}
 
- `,
-};
+RESUME TO OPTIMIZE:
+{resumeText}
 
-const generationConfig = {
-  maxOutputTokens: 6002,
-  temperature: 0.0,
-  topP: 0,
-  responseModalities: ["TEXT"],
+{jobDescriptionSection}
 
-  systemInstruction: {
-    parts: [{ text: systemInstruction.text }],
-  },
-};
+OPTIMIZED RESUME:`;
 
-export const optimizeResumeai = async (resumeText) => {
+// Create the prompt template
+const chatPrompt = ChatPromptTemplate.fromMessages([
+  SystemMessagePromptTemplate.fromTemplate(systemTemplate),
+  HumanMessagePromptTemplate.fromTemplate(humanTemplate),
+]);
+
+// Create the chain: prompt -> model -> output parser
+const chain = RunnableSequence.from([
+  chatPrompt,
+  model,
+  new StringOutputParser(),
+]);
+
+/**
+ * Optimize a resume using LangChain with Google Gemini
+ * @param resumeText - The raw resume text to optimize
+ * @param targetRole - Target job role or industry
+ * @param jobDescriptions - Optional array of job descriptions for keyword matching
+ * @returns The optimized resume text
+ */
+export const optimizeResumeAI = async (
+  resumeText: string,
+  targetRole: string,
+  jobDescriptions: string[] = []
+): Promise<string> => {
+  if (!resumeText) throw new Error("Resume text is required.");
+  if (!targetRole) throw new Error("Target role/industry is required.");
+
   try {
-    const req = {
-      model: model,
-      contents: [
-        {
-          parts: [
-            { text: `Please optimize the following resume:\n\n${resumeText}` },
-          ],
-        },
-      ],
-      config: generationConfig,
-    };
+    // Build job description section if provided
+    const jobDescriptionSection = jobDescriptions.length > 0
+      ? `JOB DESCRIPTIONS FOR KEYWORD REFERENCE:\n${jobDescriptions.join("\n\n---\n\n")}`
+      : "";
 
-    // Get response from Gemini
-    const response = await ai.models.generateContent(req);
-    return await response.text;
+    // Invoke the chain with template variables
+    const result = await chain.invoke({
+      targetRole,
+      resumeText,
+      jobDescriptionSection,
+    });
+
+    return result;
   } catch (error) {
     console.error("AI optimization error:", error);
     throw new Error("Failed to optimize resume with AI service");
+  }
+};
+
+/**
+ * Alternative: Get structured analysis with recommendations
+ */
+export const analyzeResumeAI = async (
+  resumeText: string,
+  targetRole: string
+): Promise<{
+  strengths: string[];
+  weaknesses: string[];
+  recommendations: string[];
+  optimizedResume: string;
+}> => {
+  const analysisSystemTemplate = `You are an expert resume analyst. Analyze the resume and provide structured feedback.
+
+Return your response in this exact JSON format:
+{{
+  "strengths": ["strength 1", "strength 2", ...],
+  "weaknesses": ["weakness 1", "weakness 2", ...],
+  "recommendations": ["recommendation 1", "recommendation 2", ...],
+  "optimizedResume": "The complete optimized resume text"
+}}`;
+
+  const analysisHumanTemplate = `TARGET ROLE: {targetRole}
+
+RESUME:
+{resumeText}
+
+Analyze and optimize this resume. Return JSON only.`;
+
+  const analysisPrompt = ChatPromptTemplate.fromMessages([
+    SystemMessagePromptTemplate.fromTemplate(analysisSystemTemplate),
+    HumanMessagePromptTemplate.fromTemplate(analysisHumanTemplate),
+  ]);
+
+  const analysisChain = RunnableSequence.from([
+    analysisPrompt,
+    model,
+    new StringOutputParser(),
+  ]);
+
+  try {
+    const result = await analysisChain.invoke({
+      targetRole,
+      resumeText,
+    });
+
+    // Parse JSON response
+    const parsed = JSON.parse(result);
+    return parsed;
+  } catch (error) {
+    console.error("Resume analysis error:", error);
+    throw new Error("Failed to analyze resume");
   }
 };
