@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Node.js app to Azure Web App - resume-op-api
+name: Build and deploy Node.js app to Azure Web App - resume-op-app
 
 on:
   push:
@@ -29,31 +29,41 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
+<<<<<<< HEAD:.github/workflows/main_resume-op-api.yml
       - name: Zip artifact for deployment
         # Clean zip: excludes .git, node_modules, and other dev junk
         run: zip release.zip ./* -r -x "node_modules/*" ".git/*" ".github/*" "src/*"
 
+=======
+>>>>>>> 4bddbade157439cc80969d7a38151ac8a12b484f:.github/workflows/main_resume-op-app.yml
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: release.zip
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
+<<<<<<< HEAD:.github/workflows/main_resume-op-api.yml
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
+=======
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+>>>>>>> 4bddbade157439cc80969d7a38151ac8a12b484f:.github/workflows/main_resume-op-app.yml
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
+<<<<<<< HEAD:.github/workflows/main_resume-op-api.yml
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
@@ -64,11 +74,20 @@ jobs:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_A7F7CFB1D4DA4A7BB2A19D4EDF4B575A }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E1B19A243AB542A7877D58BB1C40DC7F }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_143F092C41B04DBD8E51A60A0C1466F8 }}
+=======
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F11A3CE8625C452989993B5BDD147FAC }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_AC40A3AE2FA54C36BA8C5ED5CC07AB1B }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_EE3568177C154F2C921516E11D116F4E }}
+>>>>>>> 4bddbade157439cc80969d7a38151ac8a12b484f:.github/workflows/main_resume-op-app.yml
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'resume-op-api'
+          app-name: 'resume-op-app'
           slot-name: 'Production'
           package: .
