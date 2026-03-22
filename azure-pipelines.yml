@@ -12,7 +12,7 @@ variables:
   nodeVersion: '22.x'
   azureServiceConnection: 'Azure subscription 1(156c186b-44ba-4fb4-98c1-4ff26e131d41)'
   webAppName: 'resume-op-app'
-  vmImageName: 'ubuntu-latest'
+  agentPoolName: 'Default'
 
 stages:
   - stage: BuildAndTest
@@ -21,7 +21,7 @@ stages:
       - job: Build
         displayName: Install, test, and build
         pool:
-          vmImage: $(vmImageName)
+          name: $(agentPoolName)
 
         steps:
           - task: NodeTool@0
@@ -83,7 +83,7 @@ stages:
         displayName: Deploy web app
         environment: production
         pool:
-          vmImage: $(vmImageName)
+          name: $(agentPoolName)
         strategy:
           runOnce:
             deploy:
