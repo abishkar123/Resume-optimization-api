@@ -1,28 +1,102 @@
-# Node.js
-- task: AzureRmWebAppDeployment@5
-  inputs:
-    ConnectionType: 'AzureRM'
-    azureSubscription: 'Azure subscription 1(156c186b-44ba-4fb4-98c1-4ff26e131d41)'
-    appType: 'webApp'
-    WebAppName: 'resume-op-app'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
-- main
+  branches:
+    include:
+      - main
 
-pool:
-  vmImage: ubuntu-latest
+pr:
+  branches:
+    include:
+      - main
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '20.x'
-  displayName: 'Install Node.js'
+variables:
+  nodeVersion: '22.x'
+  azureServiceConnection: 'Azure subscription 1(156c186b-44ba-4fb4-98c1-4ff26e131d41)'
+  webAppName: 'resume-op-app'
+  vmImageName: 'ubuntu-latest'
 
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+stages:
+  - stage: BuildAndTest
+    displayName: Build and test
+    jobs:
+      - job: Build
+        displayName: Install, test, and build
+        pool:
+          vmImage: $(vmImageName)
+
+        steps:
+          - task: NodeTool@0
+            displayName: Use Node.js $(nodeVersion)
+            inputs:
+              versionSpec: $(nodeVersion)
+
+          - task: Cache@2
+            displayName: Cache npm
+            inputs:
+              key: 'npm | "$(Agent.OS)" | package-lock.json'
+              restoreKeys: |
+                npm | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.npm
+
+          - script: npm ci
+            displayName: Install dependencies
+            env:
+              npm_config_cache: $(Pipeline.Workspace)/.npm
+
+          - script: npm test -- --runInBand
+            displayName: Run tests
+
+          - script: npm run build
+            displayName: Build application
+
+          - script: |
+              mkdir -p $(Build.ArtifactStagingDirectory)/app
+              cp package.json $(Build.ArtifactStagingDirectory)/app/
+              cp package-lock.json $(Build.ArtifactStagingDirectory)/app/
+              cp -R dist $(Build.ArtifactStagingDirectory)/app/
+              npm ci --omit=dev --prefix $(Build.ArtifactStagingDirectory)/app
+            displayName: Prepare deployment package
+            env:
+              npm_config_cache: $(Pipeline.Workspace)/.npm
+
+          - task: ArchiveFiles@2
+            displayName: Archive deployment package
+            inputs:
+              rootFolderOrFile: $(Build.ArtifactStagingDirectory)/app
+              includeRootFolder: false
+              archiveType: zip
+              archiveFile: $(Build.ArtifactStagingDirectory)/app.zip
+              replaceExistingArchive: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: Publish artifact
+            inputs:
+              PathtoPublish: $(Build.ArtifactStagingDirectory)/app.zip
+              ArtifactName: drop
+              publishLocation: Container
+
+  - stage: Deploy
+    displayName: Deploy to Azure App Service
+    dependsOn: BuildAndTest
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployWebApp
+        displayName: Deploy web app
+        environment: production
+        pool:
+          vmImage: $(vmImageName)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: drop
+
+                - task: AzureWebApp@1
+                  displayName: Deploy to Azure App Service
+                  inputs:
+                    azureSubscription: $(azureServiceConnection)
+                    appType: webAppLinux
+                    appName: $(webAppName)
+                    package: $(Pipeline.Workspace)/drop/app.zip
+                    runtimeStack: 'NODE|22-lts'
+                    startUpCommand: 'npm start'
