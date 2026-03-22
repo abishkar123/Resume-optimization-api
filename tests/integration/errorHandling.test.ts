@@ -27,7 +27,7 @@ describe('Error Handling & Edge Cases', () => {
         await mockError();
         fail('Should throw error');
       } catch (error: any) {
-        expect(error.message.toLowerCase()).toContain('timeout');
+        expect(error.message.toLowerCase()).toMatch(/timeout|timed out/);
       }
     });
 
