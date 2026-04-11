@@ -1,7 +1,7 @@
 /**
  * Unit tests for middleware (auth, file upload, rate limiting)
  */
-import { createMockRequest, createMockResponse, createMockNext, createMockFile, expectErrorResponse } from '../helpers/test-utils';
+import { createMockRequest, createMockFile } from '../helpers/test-utils';
 import { createMockFirebaseToken } from '../mocks/firebase.mock';
 
 describe('Middleware Unit Tests', () => {
