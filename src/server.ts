@@ -43,15 +43,15 @@ import resumeRoutes from "./route/resumeRoute";
 
 app.use("/api/v1/resumes", resumeRoutes);
 
-app.use("/", (req, res, next) => {
+app.use("/", (req, res, _next) => {
   const error = {
     message: "You dont have promission here",
   };
-  next(error);
+  _next(error);
 });
 
 //global error handleer
-app.use((error, req, res, next) => {
+app.use((error, req, res, _next) => {
   const statusCode = Number(error.errorCode) || 404;
   res.status(statusCode).json({
     status: "error",
