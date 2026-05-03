@@ -73,3 +73,4 @@ When you successfully complete your work:
 
 - Use `create-issue` to publish the daily report issue when there is reportable activity or open blockers.
 - Use `noop` only when you verified there is no reportable activity and no open blockers.
+
