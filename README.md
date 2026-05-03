@@ -1,76 +1,53 @@
-# Resume Optimization API
+# Resume Optimization Application
+Welcome to the app for resume optimization . This application build for optimizate the resume base on user requirement source by AI Model.
 
-Node.js and TypeScript API for resume upload, text extraction, AI-driven optimization, and storage integration.
+## Project Overview 
 
-## Overview
-
-This repository contains the backend for the Resume Optimization application. It handles:
-
-- authenticated resume uploads
-- PDF and DOC/DOCX text extraction
-- AI-assisted resume analysis and optimization
-- S3 storage integration
-- Firebase-based authentication
-- request rate limiting and security middleware
-
-## Project Diagram
-
-### Resume Optimization Application Architecture
+### Resume Optimization Application Architecture 
 ![Alt Text](./src/assets/resume-op.png)
 
-## Architecture
+## Features 
+- Login page where user authenticated by google
+- single page applicaton 
+- state manaagement - userinfo Persisted
+- You can upload resume both pdf and word file.
 
-- `src/controllers` - HTTP request handlers
-- `src/services` - business logic and external integrations
-- `src/middleware` - auth, rate limiting, and upload handling
-- `src/config` - database, Firebase, and S3 configuration
-- `src/model` - persistence models
-- `src/route` - route registration
-- `src/utils` - shared helpers
-- `tests` - unit test coverage and mocks
+## Geeting Started
+## Prerequisits 
+- Nodejs(16+)
+- NPM
 
-## Requirements
-
-- Node.js 16 or newer
-- npm
-
-## Setup
-
-1. Install dependencies:
+## Setup Instructions
+1. Clone the repository:
 
    ```bash
+   git clone https://github.com/abishkar123/Resume-optimization-api.git
+   
+   ```
+2. Clone the repository:
+   ```bash
+   cd api
    npm install
    ```
 
-2. Configure environment variables in `.env`.
-
-3. Start the development server:
-
+3. Running the Application 
    ```bash
-   npm run dev
+   npm run dev 
+   ```
+4. Run the test
+   ```bash
+   npm test
    ```
 
-## Available Scripts
+## Project Strcuture 
 
-- `npm run dev` - start the API with auto-reload
-- `npm run build` - compile TypeScript to `dist`
-- `npm start` - run the compiled server from `dist`
-- `npm run lint` - run ESLint across `src` and `tests`
-- `npm run lint:fix` - automatically fix lint issues where possible
-- `npm test` - run the full Jest test suite
-- `npm run test:unit` - run unit tests only
-- `npm run test:integration` - run integration tests only
-- `npm run test:coverage` - generate coverage reports
-
-## Testing and Quality
-
-This repository now includes ESLint-based linting alongside Jest tests. Run these before opening a pull request:
-
-```bash
-npm run lint
-npm test
-npm run build
-```
+- src/: Contain the soruce code of the application.
+ - compontents/:  all custom components ex-Header, private router
+ - page/: contain all pages such a home and upload page
+ - private-route: route the page based on authentication
+ - useAuth:/ contain state management for user
+ - helper:/ this folder have fetch frontend api.
+ - tests:/ there three different test, for each page and api.
 
 ## Container Deployment to Azure App Service
 
@@ -166,5 +143,6 @@ The workflow builds, tests, compiles TypeScript, builds the Docker image, pushes
 
 ## Notes
 
-- Uploaded files and generated artifacts are excluded from source control.
-- The repository is currently backend-only; frontend concerns are handled elsewhere.
+ ## Dev Dependencies
+- nodemon: Tool that helps develop node.js based applications by automatically restarting the node application when file changes in the directory are detected
+  
