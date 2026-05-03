@@ -67,6 +67,11 @@ jobs:
       id-token: write
       contents: read
 
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
+
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -74,12 +79,21 @@ jobs:
           name: resume-app
           path: ${{ env.PACKAGE_PATH }}
 
+      - name: Validate Azure configuration
+        run: |
+          : "${AZURE_CLIENT_ID:?Set AZURE_CLIENT_ID as a repository variable or secret}"
+          : "${AZURE_TENANT_ID:?Set AZURE_TENANT_ID as a repository variable or secret}"
+          : "${AZURE_SUBSCRIPTION_ID:?Set AZURE_SUBSCRIPTION_ID as a repository variable or secret}"
+
       - name: Azure Login using OIDC
         uses: azure/login@v2
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          auth-type: SERVICE_PRINCIPAL
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+          audience: api://AzureADTokenExchange
+          environment: azurecloud
 
       - name: Ensure App Service uses Node runtime
         run: |
