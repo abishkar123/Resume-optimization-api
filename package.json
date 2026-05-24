@@ -38,25 +38,25 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.779.0",
     "@aws-sdk/s3-request-presigner": "^3.796.0",
-    "@google/genai": "^0.10.0",
+    "@google/genai": "^2.6.0",
     "@langchain/core": "^1.1.19",
     "@langchain/google-genai": "^2.1.15",
     "aws-sdk": "^2.1692.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
+    "dotenv": "^17.4.2",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
     "firebase-admin": "^13.6.1",
     "helmet": "^8.1.0",
     "langchain": "^1.2.18",
     "mammoth": "^1.9.0",
-    "mongodb": "^6.16.0",
-    "mongoose": "^8.13.2",
+    "mongodb": "^7.2.0",
+    "mongoose": "^9.6.2",
     "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.2",
+    "multer": "^2.1.1",
     "nodemon": "^3.1.10",
-    "pdf-parse": "^1.1.1",
+    "pdf-parse": "^2.4.5",
     "url": "^0.11.4",
-    "uuid": "^11.1.0"
+    "uuid": "^14.0.0"
   }
 }
