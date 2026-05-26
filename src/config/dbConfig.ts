@@ -9,8 +9,6 @@ export const connectDB = async () => {
     if (!process.env.MONGO_URL) {
       throw new Error("MONGO_URL environment variable is not set.");
     }
-    mongoose.set("strictQuery", true);
-
     const conn = await mongoose.connect(process.env.MONGO_URL);
 
     if (conn?.connections[0].readyState === 1) {
